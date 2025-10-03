@@ -4,7 +4,7 @@ WHERE duration = (SELECT MAX(duration) FROM musical_tracks)
 
 -- Выводим название треков, продолжительность которых не менее 3,5 минут.
 SELECT name, duration FROM musical_tracks
-WHERE duration <= (3.5 * 60)
+WHERE duration >= (3.5 * 60)
 
 -- Выводим названия сборников, вышедших в период с 2018 по 2020 год включительно.
 SELECT name FROM music_collection
@@ -15,8 +15,9 @@ SELECT name FROM music_artist
 WHERE name NOT LIKE '% %'
 
 -- Выводим название треков, которые содержат слово «мой» или «my».
-SELECT name FROM musical_tracks
-WHERE name LIKE '%мой%' OR name LIKE '%my%'
+SELECT name 
+FROM musical_tracks AS mt
+WHERE name ~* '\yмой\y' OR name ~* '\ymy\y';
 
 
 -- Выводим количество исполнителей в каждом жанре. (специально LEFT JOIN, чтобы и нулевые значения вывелись)
@@ -27,12 +28,11 @@ LEFT JOIN music_artist AS ma ON ag.artist_id = ma.artist_id
 GROUP BY mg.name
 ORDER BY artist_count DESC;
 
--- Выводим количество треков, вошедших в альбомы 2013–2014 годов. (изменил с промежутка 2019-2020, для наглядности)
-SELECT ma.name, COUNT(mt.name) AS track_count
+-- Выводим количество треков, вошедших в альбомы 2019–2020 годов.
+SELECT COUNT(mt.name) AS track_count
 FROM musical_tracks AS mt
 JOIN music_album AS ma ON mt.album_id = ma.album_id
-WHERE ma.year BETWEEN 2013 AND 2014
-GROUP BY ma.name;
+WHERE ma.year BETWEEN 2019 AND 2020;
 
 -- Выводим среднюю продолжительность треков по каждому альбому.
 SELECT ma.name, ROUND(AVG(mt.duration), 2) AS track_duration
@@ -41,15 +41,18 @@ JOIN music_album AS ma ON mt.album_id = ma.album_id
 GROUP BY ma.name
 ORDER BY track_duration DESC;
 
--- Выводим всех исполнителей, которые не выпустили альбомы в 2013 году. (изменил с 2020 года, для наглядности)
+-- Выводим всех исполнителей, которые не выпустили альбомы в 2020 году.
 SELECT mart.name
 FROM music_artist AS mart
-JOIN artist_albums AS aa ON mart.artist_id = aa.artist_id
-JOIN music_album AS malb ON malb.album_id = aa.album_id
-WHERE malb.year = '2013'
-GROUP BY mart.name;
+WHERE mart.name NOT IN (
+	SELECT mart.name
+	FROM music_artist AS mart
+	JOIN artist_albums AS aa ON mart.artist_id = aa.artist_id
+	JOIN music_album AS malb ON malb.album_id = aa.album_id
+	WHERE malb.year = '2020'
+);
 
--- Выводим названия сборников, в которых присутствует конкретный исполнитель (выберите его сами). (У меня во всех сборниках присутствуют все исполнители, но вроде правильно работает)
+-- Выводим названия сборников, в которых присутствует конкретный исполнитель (выберите его сами).
 SELECT mc.name
 FROM music_collection AS mc
 JOIN collection_and_tracks AS ct ON ct.collection_id = mc.collection_id
@@ -68,10 +71,10 @@ JOIN artist_albums AS aa ON aa.album_id = malb.album_id
 JOIN music_artist AS mart ON mart.artist_id = aa.artist_id
 JOIN artist_genres AS ag ON ag.artist_id = mart.artist_id
 JOIN musical_genres AS mg ON mg.musical_genre_id = ag.musical_genre_id
-GROUP BY malb.name
-HAVING COUNT(mg.musical_genre_id) > 1;
+GROUP BY malb.name, mart.artist_id
+HAVING count(mg.musical_genre_id) > 1;
 
--- Выводим наименования треков, которые не входят в сборники (У меня все треки входят в сборники...)
+-- Выводим наименования треков, которые не входят в сборники
 SELECT mt.name 
 FROM musical_tracks AS mt
 LEFT JOIN collection_and_tracks AS ct ON mt.track_id = ct.track_id
@@ -89,7 +92,7 @@ WITH track_durations AS (
 SELECT name
 FROM track_durations
 WHERE track_duration = (
-	SELECT MIN(track_duration)
+	SELECT min(track_duration)
 	FROM track_durations
 	);
 
@@ -102,7 +105,4 @@ WITH album_counts AS (
 )
 SELECT name
 FROM album_counts
-WHERE num_tracks = (
-	SELECT MIN(num_tracks) 
-	FROM album_counts
-);
+WHERE num_tracks = (SELECT MIN(num_tracks) FROM album_counts);

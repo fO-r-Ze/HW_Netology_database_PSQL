@@ -23,7 +23,8 @@ VALUES
 ('Баста'),
 ('Егор Крид'),
 ('Валерий Меладзе'),
-('Полина Гагарина')
+('Полина Гагарина'),
+('Some artist to test')
 ON CONFLICT (name) DO NOTHING;
 
 -- Добавляем связь между жанрами и исполнителями
@@ -35,7 +36,8 @@ WHERE
     (ma.name = 'Баста' AND mg.name IN ('hip-hop', 'rap')) OR
     (ma.name = 'Егор Крид' AND mg.name IN ('pop', 'r&b')) OR
     (ma.name = 'Валерий Меладзе' AND mg.name IN ('estrada', 'pop')) OR
-    (ma.name = 'Полина Гагарина' AND mg.name IN ('pop', 'pop-soul'))
+    (ma.name = 'Полина Гагарина' AND mg.name IN ('pop', 'pop-soul')) OR
+    (ma.name = 'Some artist to test' AND mg.name IN ('lounge-jazz'))
 ON CONFLICT DO NOTHING;
 
 -- Наполняем таблицу музыкальными альбомами
@@ -53,7 +55,9 @@ VALUES
 ('EGOR KRID #FRESHBLOOD', 2019),
 ('Было, но прошло', 2008),
 ('Basta!', 2018),
-('История любви', 2013)
+('История любви', 2013),
+('test albom with my', 2020),
+('test albom without my', 2021)
 ON CONFLICT DO NOTHING;
 
 -- Добавляем связь между альбомами и исполнителями
@@ -65,7 +69,8 @@ WHERE
     (ma.name = 'Баста' AND mal.name IN ('Баста 4', 'Звезда и Смерть Хоакина Мурьеты', 'Город дорог', 'Basta!')) OR
     (ma.name = 'Егор Крид' AND mal.name IN ('Что они знают?', '50 оттенков Крида', 'EGOR KRID #FRESHBLOOD')) OR
     (ma.name = 'Валерий Меладзе' AND mal.name IN ('Полет бумеранга', 'Амелия', 'Было, но прошло', 'История любви')) OR
-    (ma.name = 'Полина Гагарина' AND mal.name IN ('9', '7'))
+    (ma.name = 'Полина Гагарина' AND mal.name IN ('9', '7')) OR
+    (ma.name = 'Some artist to test' AND mal.name IN ('test albom with my', 'test albom without my'))
 ON CONFLICT DO NOTHING;
 
 -- Наполняем таблицу музыкальными треками
@@ -86,7 +91,18 @@ VALUES
 ('Обнимашки-поцелуи', 245, 12),
 ('Где эта ночь?', 225, 2),
 ('Ах, какая женщина', 295, 13),
-('Колыбельная', 275, 4)
+('Колыбельная', 275, 4),
+('my own', 195, 14),
+('own my', 190, 14),
+('my', 200, 14),
+('oh my god', 205, 14),
+('myself', 210, 15),
+('by myself', 215, 15),
+('bemy self', 220, 15),
+('myself by', 230, 15),
+('by myself by', 235, 15),
+('beemy', 240, 15),
+('premyne', 245, 15)
 ON CONFLICT DO NOTHING;
 
 -- Наполняем таблицу музыкальными сборниками
